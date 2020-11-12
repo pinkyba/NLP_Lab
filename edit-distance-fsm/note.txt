@@ -1,0 +1,63 @@
+>>>> Install fst in ubuntu <<<< Installation guide link - https://aghriss.github.io/posts/2018/01/01/OpenFSTubuntu.html
+
+##### Preprocessing state #######
+
+>>> Prepare 4 files to build finite state model
+(1) input file << input of model that we bulid (eg- for edit distance fst model of Myan language, input is all consonant and vowel). In this fst example, input file is pos.txt
+(2)	output file << output of model (in edit distance fst model, output is all consonant and vowel.) In this fst example, 		output file is word.txt
+(3)	dictionary file << flow of model (eg- edit distance flow i.e - insertion, deletion, substitution). In this fst example, 	dictionary file is dict.txt
+(4) test file << format of test sentence to parse fst model. In this fst example, test file is sentence.txt
+
+
+#prepare format for test input sentence to parse fst model
+python sentence.py $1 > sentence.txt
+
+
+##### command for building fst model ##############################
+
+
+# run this command, you will get finite state acceptor model(sentence.fsa )
+# make Sentence FSA
+fstcompile --acceptor --isymbols=pos.txt sentence.txt > sentence.fsa;
+
+# print Sentence FSA
+fstprint --isymbols=pos.txt sentence.fsa
+
+# Draw strings FST graph
+fstdraw --portrait --isymbols=pos.txt  ./sentence.fsa | dot -Tpdf -Gsize=6,3 -Eheadport=e -Etailport=w > sentence.pdf;
+
+# open sentence.pdf file with evince PDF file viewer
+evince ./sentence.pdf;
+
+
+
+# run this command, you will get finite state transistor model (dict.fst)
+# make Dictionary FST
+fstcompile --isymbols=pos.txt --osymbols=word.txt dict.txt > dict.fst
+
+# print dictionary FST
+fstprint --isymbols=pos.txt --osymbols=word.txt dict.fst
+
+# Draw dictionary graph
+fstdraw --portrait --isymbols=pos.txt  --osymbols=word.txt dict.fst | dot -Tpdf -Gsize=6,3 -Eheadport=e -Etailport=w > dict.pdf
+
+# if you don't have evince PDF file reader, you need to install
+evince ./dict.pdf
+
+
+# compose fsa and fst model, you will get composed fst model(strings.fst)
+# print possible strings
+fstcompose sentence.fsa dict.fst > strings.fst;
+
+# Draw strings FST graph
+fstdraw --portrait --isymbols=pos.txt  --osymbols=word.txt ./strings.fst | dot -Tpdf -Gsize=6,3 -Eheadport=e -Etailport=w > strings.pdf;
+
+evince ./strings.pdf;
+
+
+# find shortestpath
+
+fstshortestpath ./strings.fst > shortest-path.fst
+fstdraw --portrait --isymbols=pos.txt  --osymbols=word.txt ./shortest-path.fst | dot -Tpdf -Gsize=6,3 -Eheadport=e -Etailport=w > shortest-path.pdf
+
+evince ./shortest-path.pdf
